@@ -118,11 +118,8 @@ jobs:
 
         Write-Host "Runner OS       : $env:RUNNER_OS"
         Write-Host "Runner Arch     : $env:RUNNER_ARCH"
-
-        Write-Host "System          : ${{ matrix.sys }}"
-        Write-Host "SDK             : $env:SDK_VERSION"
-        Write-Host "TFM             : $env:TFM"
-        Write-Host "Test SDK        : $env:TESTSDK_VERSION"
+        Write-Host "Requested OS    : ${{ matrix.os }}"
+        Write-Host "Requested Arch  : ${{ matrix.arch }}"
 
     ####################################################################
     # Install SDK
