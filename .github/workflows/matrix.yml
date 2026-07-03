@@ -121,6 +121,18 @@ jobs:
         Write-Host "Requested OS    : ${{ matrix.os }}"
         Write-Host "Requested Arch  : ${{ matrix.arch }}"
 
+    - name: Verify environment
+      shell: pwsh
+      run: |
+        Write-Host "DOTNET_INSTALL_DIR=$env:DOTNET_INSTALL_DIR"
+        Write-Host "PROCESSOR_ARCHITECTURE=$env:PROCESSOR_ARCHITECTURE"
+
+        if ($IsWindows) {
+            cmd /c set
+        } else {
+            env | sort
+        }
+
     ####################################################################
     # Install SDK
     ####################################################################
