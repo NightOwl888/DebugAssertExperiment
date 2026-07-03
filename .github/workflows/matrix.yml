@@ -77,10 +77,10 @@ jobs:
       run: |
         $dir = "C:\w"
 
-        mkdir $dir -Force
-        mkdir "$dir\temp" -Force
-        mkdir "$dir\dotnet" -Force
-        mkdir "$dir\work" -Force
+        New-Item -ItemType Directory -Force -Path $dir | Out-Null
+        New-Item -ItemType Directory -Force -Path "$dir\temp" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$dir\dotnet" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$dir\work" | Out-Null
 
         Add-Content $env:GITHUB_ENV "WORKPATH=$dir\work"
         Add-Content $env:GITHUB_ENV "TMP=$dir\temp"
@@ -94,10 +94,10 @@ jobs:
       run: |
         $dir = "${{ runner.temp }}/w"
 
-        mkdir $dir -Force
-        mkdir "$dir/temp" -Force
-        mkdir "$dir/dotnet" -Force
-        mkdir "$dir/work" -Force
+        New-Item -ItemType Directory -Force -Path $dir | Out-Null
+        New-Item -ItemType Directory -Force -Path "$dir/temp" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$dir/dotnet" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$dir/work" | Out-Null
 
         Add-Content $env:GITHUB_ENV "WORKPATH=$dir/work"
         Add-Content $env:GITHUB_ENV "TMP=$dir/temp"
