@@ -126,13 +126,13 @@ jobs:
     ####################################################################
 
     - name: Setup .NET SDK
-      if: matrix.sys != 'win-x86'
+      if: matrix.arch != 'x86'
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.SDK_VERSION }}
 
     - name: Setup .NET SDK (x86)
-      if: matrix.sys == 'win-x86'
+      if: matrix.arch == 'x86'
       uses: actions/setup-dotnet@v4
       env:
         PROCESSOR_ARCHITECTURE: x86
