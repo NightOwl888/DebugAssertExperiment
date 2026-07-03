@@ -213,8 +213,6 @@ jobs:
       shell: pwsh
       run: |
         dotnet restore `
-          --framework ${env:TFM} `
-          -c Release `
           -p:AllTargetFrameworks=false `
           -p:TestSdkVersion=${env:TESTSDK_VERSION}
 
