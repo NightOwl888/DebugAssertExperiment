@@ -213,7 +213,6 @@ jobs:
       shell: pwsh
       run: |
         dotnet restore `
-          -p:AllTargetFrameworks=false `
           -p:TestSdkVersion=${env:TESTSDK_VERSION}
 
     - name: Build
