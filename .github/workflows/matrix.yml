@@ -204,3 +204,47 @@ jobs:
       run: |
         Get-ChildItem Env: |
           Sort-Object Name
+
+    ####################################################################
+    # Run experiment
+    ####################################################################
+
+    - name: Restore
+      shell: pwsh
+      run: |
+        dotnet restore DebugAssertExperiment.slnx `
+          -p:TargetFrameworks=${env:TFM} `
+          -p:TestSdkVersion=${env:TESTSDK_VERSION}
+
+    - name: Build
+      shell: pwsh
+      run: |
+        dotnet build DebugAssertExperiment.slnx `
+          -c Release `
+          --no-restore `
+          -p:TargetFrameworks=${env:TFM} `
+          -p:TestSdkVersion=${env:TESTSDK_VERSION}
+
+    - name: Test
+      shell: pwsh
+      run: |
+        $args = @(
+            "-c","Release",
+            "--no-build",
+            "--framework",$env:TFM,
+            "--logger:console;verbosity=detailed",
+            "--logger:trx",
+            "--results-directory","TestResults",
+            "-v:diag",
+            "-p:TestSdkVersion=$env:TESTSDK_VERSION",
+            "--", "RunConfiguration.TargetPlatform=${{ matrix.arch }}"
+        )
+
+        dotnet test DebugAssertExperiment.slnx @args
+
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: TestResults-${{ matrix.os }}-${{ matrix.arch }}-${{ env.TFM }}-${{ env.TESTSDK_VERSION }}
+        path: TestResults
