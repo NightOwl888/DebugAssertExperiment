@@ -213,6 +213,8 @@ jobs:
       shell: pwsh
       run: |
         dotnet restore `
+          -p:TargetFramework=${env:TFM} `
+          -p:AllTargetFrameworks=false `
           -p:TestSdkVersion=${env:TESTSDK_VERSION}
 
     - name: Build
