@@ -63,6 +63,9 @@ jobs:
             || matrix.sdk == '9.0.x' && 'net9.0'
             || matrix.sdk == '10.0.x' && 'net10.0' }}
 
+      SOLUTION: ${{ github.workspace }}/DebugAssertExperiment.slnx
+      PROJECT: ${{ github.workspace }}/tests/Probe.Tests/Probe.Tests.csproj
+
     steps:
 
     - uses: actions/checkout@v4
@@ -212,7 +215,7 @@ jobs:
     - name: Restore
       shell: pwsh
       run: |
-        dotnet restore `
+        dotnet restore ${env:PROJECT} `
           -p:TargetFramework=${env:TFM} `
           -p:AllTargetFrameworks=false `
           -p:TestSdkVersion=${env:TESTSDK_VERSION}
@@ -220,7 +223,7 @@ jobs:
     - name: Build
       shell: pwsh
       run: |
-        dotnet build `
+        dotnet build ${env:PROJECT} `
           --framework ${env:TFM} `
           -c Release `
           --no-restore `
@@ -231,6 +234,7 @@ jobs:
       shell: pwsh
       run: |
         $args = @(
+            "test", "${env:PROJECT}",
             "-c","Release",
             "--no-build",
             "--framework",$env:TFM,
@@ -243,7 +247,7 @@ jobs:
             "--", "RunConfiguration.TargetPlatform=${{ matrix.arch }}"
         )
 
-        dotnet test DebugAssertExperiment.slnx @args
+        dotnet @args
 
     - name: Upload Test Results
       if: always()
