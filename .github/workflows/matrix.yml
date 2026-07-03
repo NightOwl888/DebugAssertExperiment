@@ -7,7 +7,7 @@ on:
 jobs:
   matrix:
 
-    name: ${{ matrix.sys }} | SDK ${{ matrix.sdk }} | TestSDK ${{ matrix.testsdk }}
+    name: ${{matrix.os}} | ${{ matrix.arch }} | SDK ${{ matrix.sdk }} | TestSDK ${{ matrix.testsdk }}
 
     strategy:
       fail-fast: false
@@ -212,17 +212,20 @@ jobs:
     - name: Restore
       shell: pwsh
       run: |
-        dotnet restore DebugAssertExperiment.slnx `
-          -p:TargetFrameworks=${env:TFM} `
+        dotnet restore `
+          --framework ${env:TFM} `
+          -c Release `
+          -p:AllTargetFrameworks=false `
           -p:TestSdkVersion=${env:TESTSDK_VERSION}
 
     - name: Build
       shell: pwsh
       run: |
-        dotnet build DebugAssertExperiment.slnx `
+        dotnet build `
+          --framework ${env:TFM} `
           -c Release `
           --no-restore `
-          -p:TargetFrameworks=${env:TFM} `
+          -p:AllTargetFrameworks=false `
           -p:TestSdkVersion=${env:TESTSDK_VERSION}
 
     - name: Test
@@ -236,6 +239,7 @@ jobs:
             "--logger:trx",
             "--results-directory","TestResults",
             "-v:diag",
+            "-p:AllTargetFrameworks=false",
             "-p:TestSdkVersion=$env:TESTSDK_VERSION",
             "--", "RunConfiguration.TargetPlatform=${{ matrix.arch }}"
         )
