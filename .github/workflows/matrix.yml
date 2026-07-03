@@ -1,0 +1,183 @@
+name: DebugAssert Matrix
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  matrix:
+
+    name: ${{ matrix.sys }} | SDK ${{ matrix.sdk }} | TestSDK ${{ matrix.testsdk }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+
+        sdk:
+          - "8.0.100"
+          - "9.0.100"
+          - "10.0.100"
+
+        testsdk:
+          - "17.11.1"
+          - "18.7.0"
+
+        sys:
+          - win-x86
+          - win-x64
+          - linux-x64
+          - linux-arm64
+          - osx-x64
+          - osx-arm64
+
+    runs-on: ${{ fromJSON('{
+      "win-x86":["windows-2022"],
+      "win-x64":["windows-2022"],
+      "linux-x64":["ubuntu-24.04"],
+      "linux-arm64":["ubuntu-24.04-arm"],
+      "osx-x64":["macos-15-intel"],
+      "osx-arm64":["macos-latest"]
+    }')[matrix.sys] }}
+
+    env:
+
+      SDK_VERSION: ${{ matrix.sdk }}
+      TESTSDK_VERSION: ${{ matrix.testsdk }}
+
+      TFM: ${{ matrix.sdk == '8.0.100' && 'net8.0'
+            || matrix.sdk == '9.0.100' && 'net9.0'
+            || 'net10.0' }}
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    ####################################################################
+    # Set paths
+    ####################################################################
+
+    - name: Set Paths (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $dir = "C:\w"
+
+        mkdir $dir -Force
+        mkdir "$dir\temp" -Force
+        mkdir "$dir\dotnet" -Force
+        mkdir "$dir\work" -Force
+
+        Add-Content $env:GITHUB_ENV "WORKPATH=$dir\work"
+        Add-Content $env:GITHUB_ENV "TMP=$dir\temp"
+        Add-Content $env:GITHUB_ENV "TEMP=$dir\temp"
+        Add-Content $env:GITHUB_ENV "TMPDIR=$dir\temp"
+        Add-Content $env:GITHUB_ENV "DOTNET_INSTALL_DIR=$dir\dotnet"
+
+    - name: Set Paths (Linux/macOS)
+      if: runner.os != 'Windows'
+      shell: pwsh
+      run: |
+        $dir = "${{ runner.temp }}/w"
+
+        mkdir $dir -Force
+        mkdir "$dir/temp" -Force
+        mkdir "$dir/dotnet" -Force
+        mkdir "$dir/work" -Force
+
+        Add-Content $env:GITHUB_ENV "WORKPATH=$dir/work"
+        Add-Content $env:GITHUB_ENV "TMP=$dir/temp"
+        Add-Content $env:GITHUB_ENV "TEMP=$dir/temp"
+        Add-Content $env:GITHUB_ENV "TMPDIR=$dir/temp"
+        Add-Content $env:GITHUB_ENV "DOTNET_INSTALL_DIR=$dir/dotnet"
+
+    ####################################################################
+    # Display initial environment
+    ####################################################################
+
+    - name: Matrix Information
+      shell: pwsh
+      run: |
+        Write-Host "=========================="
+        Write-Host "Matrix"
+        Write-Host "=========================="
+
+        Write-Host "Runner OS       : $env:RUNNER_OS"
+        Write-Host "Runner Arch     : $env:RUNNER_ARCH"
+
+        Write-Host "System          : ${{ matrix.sys }}"
+        Write-Host "SDK             : $env:SDK_VERSION"
+        Write-Host "TFM             : $env:TFM"
+        Write-Host "Test SDK        : $env:TESTSDK_VERSION"
+
+    ####################################################################
+    # Install SDK
+    ####################################################################
+
+    - name: Setup .NET SDK
+      if: matrix.sys != 'win-x86'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.SDK_VERSION }}
+
+    - name: Setup .NET SDK (x86)
+      if: matrix.sys == 'win-x86'
+      uses: actions/setup-dotnet@v4
+      env:
+        PROCESSOR_ARCHITECTURE: x86
+      with:
+        dotnet-version: ${{ env.SDK_VERSION }}
+
+    ####################################################################
+    # Pin SDK
+    ####################################################################
+
+    - name: Generate global.json
+      shell: pwsh
+      run: |
+        $sdk = dotnet --version
+
+        @"
+        {
+          "sdk": {
+            "version": "$sdk"
+          }
+        }
+        "@ | Set-Content global.json
+
+    ####################################################################
+    # Dump SDK information
+    ####################################################################
+
+    - name: SDK Information
+      shell: pwsh
+      run: |
+        Write-Host ""
+        Write-Host "===== dotnet --version ====="
+        dotnet --version
+
+        Write-Host ""
+        Write-Host "===== dotnet --info ====="
+        dotnet --info
+
+        Write-Host ""
+        Write-Host "===== Installed SDKs ====="
+        dotnet --list-sdks
+
+        Write-Host ""
+        Write-Host "===== Installed Runtimes ====="
+        dotnet --list-runtimes
+
+        Write-Host ""
+        Write-Host "===== global.json ====="
+        Get-Content global.json
+
+    ####################################################################
+    # Dump environment
+    ####################################################################
+
+    - name: Environment
+      shell: pwsh
+      run: |
+        Get-ChildItem Env: |
+          Sort-Object Name

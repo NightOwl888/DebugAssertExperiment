@@ -1,0 +1,10 @@
+<Project>
+
+  <PropertyGroup>
+
+    <!-- Default value for local development -->
+    <TestSdkVersion Condition=" '$(TestSdkVersion)' == '' ">18.7.0</TestSdkVersion>
+
+  </PropertyGroup>
+
+</Project>
