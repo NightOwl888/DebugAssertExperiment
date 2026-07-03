@@ -225,7 +225,7 @@ jobs:
       run: |
         dotnet build ${env:PROJECT} `
           --framework ${env:TFM} `
-          -c Release `
+          -c Debug `
           --no-restore `
           -p:AllTargetFrameworks=false `
           -p:TestSdkVersion=${env:TESTSDK_VERSION}
@@ -235,7 +235,7 @@ jobs:
       run: |
         $args = @(
             "test", "${env:PROJECT}",
-            "-c","Release",
+            "-c","Debug",
             "--no-build",
             "--framework",$env:TFM,
             "--logger:console;verbosity=detailed",
